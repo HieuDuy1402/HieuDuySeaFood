@@ -1,0 +1,116 @@
+"use client";
+
+import { useOrder } from "@/lib/firestore/orders/read";
+import { CircularProgress } from "@nextui-org/react";
+import { useParams } from "next/navigation";
+import ChangeOrderStatus from "./components/ChangeStatus";
+
+export default function Page() {
+  const { orderId } = useParams();
+  const { data: order, error, isLoading } = useOrder({ id: orderId });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-48">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <>{error}</>;
+  }
+  const totalAmount = order?.checkout?.line_items?.reduce((prev, curr) => {
+    return prev + (curr?.price_data?.unit_amount) * curr?.quantity;
+  }, 0);
+
+  const formattedAmount = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(totalAmount);
+
+  const address = JSON.parse(order?.checkout?.metadata?.address ?? "");
+
+  return (
+    <main className="flex flex-col gap-4 p-5">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Chi Tiết Đơn Hàng</h1>
+        <ChangeOrderStatus order={order} />
+      </div>
+      <div className="flex flex-col gap-2 border rounded-lg p-4 bg-white">
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-3">
+            <h3 className="bg-blue-100 text-blue-500 text-xs rounded-lg px-2 py-1 uppercase">
+              {order?.paymentMode}
+            </h3>
+            <h3 className="bg-green-100 text-green-500 text-xs rounded-lg px-2 py-1 uppercase">
+              {order?.status ?? "Xử lí"}
+            </h3>
+            <h3 className="text-green-600">{formattedAmount}</h3>
+          </div>
+          <h4 className="text-gray-600 text-xs">
+            {order?.timestampCreate?.toDate()?.toString()}
+          </h4>
+        </div>
+        <div className="flex flex-col gap-3">
+          {order?.checkout?.line_items?.map((product, index) => {
+            const formattedProductPrice = new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(product?.price_data?.unit_amount);
+            return (
+              <div className="flex gap-2 items-center" key={product?.id || index}>
+                <img
+                  className="h-10 w-10 rounded-lg"
+                  src={product?.price_data?.product_data?.images?.[0]}
+                  alt="Product Image"
+                />
+                <div>
+                  <h1 className="">
+                    {product?.price_data?.product_data?.name}
+                  </h1>
+                  <h1 className="text-gray-500 text-xs">
+                  {formattedProductPrice} <span>X</span>{" "}
+                    <span>{product?.quantity?.toString()}</span>
+                  </h1>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <h1 className="text-2xl font-semibold">Thông Tin</h1>
+      <div className="flex flex-col gap-2 border rounded-lg p-4 bg-white">
+        <table>
+          <tbody>
+            <tr>
+              <td>Họ và tên</td>
+              <td>{address?.fullName}</td>
+            </tr>
+            <tr>
+              <td>Số điện thoại</td>
+              <td>{address?.mobile}</td>
+            </tr>
+            <tr>
+              <td>Email</td>
+              <td>{address?.email}</td>
+            </tr>
+            <tr>
+              <td>Địa chỉ</td>
+              <td>{address?.addressLine1}</td>
+            </tr>
+            <tr>
+              <td>Tỉnh/Thành phố</td>
+              <td>{address?.city}</td>
+            </tr>
+            <tr>
+              <td>Ghi chú</td>
+              <td>{address?.orderNote}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  );
+}
