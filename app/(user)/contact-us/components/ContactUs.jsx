@@ -17,7 +17,7 @@ function ContactUs() {
   const [mounted, setMounted] = useState(false); // To check if the component is mounted on the client side
 
   useEffect(() => {
-    setMounted(true); // Set mounted to true when the component is mounted on the client side
+    setMounted(true);
   }, []);
 
   useEffect(() => {
@@ -44,13 +44,13 @@ function ContactUs() {
 
     // Kiểm tra nếu người dùng chưa đăng nhập
     if (!user) {
-      alert("Please log in before submitting.");
+      alert("Vui lòng đăng nhập trước khi gửi.");
       return;
     }
 
     // Kiểm tra nếu chưa điền đủ thông tin
     if (!details.name || !details.email || !details.phone || !details.message) {
-      alert("All fields are required.");
+      alert("Vui lòng điền đầy đủ thông tin.");
       return;
     }
 
@@ -67,7 +67,7 @@ function ContactUs() {
       setIsSubmitted(true);
       setDetails({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
-      console.error("Error submitting contact form: ", error);
+      console.error("Lỗi khi gửi biểu mẫu liên hệ: ", error);
     }
   };
 

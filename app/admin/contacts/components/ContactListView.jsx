@@ -23,7 +23,7 @@ export default function ContactListView() {
       await deleteContact({ contactId }); // Gọi hàm xóa
       setContacts(contacts.filter(contact => contact.id !== contactId)); // Làm mới danh sách sau khi xóa
     } catch (error) {
-      console.error("Error deleting contact:", error);
+      console.error("Lỗi khi xóa liên hệ:", error);
       alert("Có lỗi khi xóa liên hệ.");
     }
   };
